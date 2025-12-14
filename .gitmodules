@@ -1,15 +1,15 @@
 [submodule "local-path-provisioner"]
 	path = local-path-provisioner
-	url = https://github.com/obaven/storage-local-path-provisioner
+	url = git@github.com:obaven/storage-local-path-provisioner.git
 [submodule "minio"]
 	path = minio
-	url = https://github.com/obaven/storage-minio
+	url = git@github.com:obaven/storage-minio.git
 [submodule "nfs-server"]
 	path = nfs-server
-	url = https://github.com/obaven/storage-nfs-server
+	url = git@github.com:obaven/storage-nfs-server.git
 [submodule "nfs-subdir-external-provisioner"]
 	path = nfs-subdir-external-provisioner
-	url = https://github.com/obaven/storage-nfs-subdir-external-provisioner
+	url = git@github.com:obaven/storage-nfs-subdir-external-provisioner.git
 [submodule "velero"]
 	path = velero
-	url = https://github.com/obaven/storage-velero
+	url = git@github.com:obaven/storage-velero.git
