@@ -1,0 +1,27 @@
+digraph arch02_tiers {
+  rankdir=LR;
+  bgcolor="#0d1117";
+  node [shape=box, style="rounded,filled", fontsize=10, fontcolor="#e6edf3", color="#202733", fillcolor="#161b22"];
+  edge [color="#8b949e", arrowsize=0.8];
+
+  sc_local [label="storage-local\nGeneral / small configs", fillcolor="#14313d", color="#1f6feb"];
+  sc_fast [label="storage-fast\nLow latency", fillcolor="#1f2d3d", color="#a371f7"];
+  sc_bulk [label="storage-bulk\nCapacity", fillcolor="#2d1f35", color="#f0883e"];
+  sc_ram [label="storage-ram\n/dev/shm (redis)", fillcolor="#20301f", color="#2ea043"];
+
+  vw [label="Vaultwarden", fillcolor="#1f2d3d", color="#a371f7"];
+  redis [label="Redis (prod/dev)", fillcolor="#20301f", color="#2ea043"];
+  harbor [label="Harbor registry/Trivy", fillcolor="#2d1f35", color="#f0883e"];
+  mail [label="Mailserver data", fillcolor="#2d1f35", color="#f0883e"];
+  forgejo [label="Forgejo/Gitea", fillcolor="#2d1f35", color="#f0883e"];
+  pg [label="Postgres", fillcolor="#2d1f35", color="#f0883e"];
+  kea [label="KEA DHCP leases", fillcolor="#14313d", color="#1f6feb"];
+
+  sc_fast -> vw;
+  sc_ram -> redis;
+  sc_bulk -> harbor;
+  sc_bulk -> mail;
+  sc_bulk -> forgejo;
+  sc_bulk -> pg;
+  sc_local -> kea;
+}

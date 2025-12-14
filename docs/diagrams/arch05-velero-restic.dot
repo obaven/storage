@@ -1,0 +1,22 @@
+digraph arch05_velero_restic {
+  rankdir=LR;
+  bgcolor="#0d1117";
+  node [shape=box, style="rounded,filled", fontsize=10, fontcolor="#e6edf3", color="#202733", fillcolor="#161b22"];
+  edge [color="#8b949e", arrowsize=0.8];
+
+  velero [label="Velero controller\n(Helm via ArgoCD)", fillcolor="#2d1f35", color="#f0883e"];
+  restic [label="Restic sidecars", fillcolor="#2d1f35", color="#f0883e"];
+  bsl [label="BackupStorageLocation\n(bulk target)", fillcolor="#2d1f35", color="#f0883e"];
+  sc_bulk [label="SC storage-bulk", fillcolor="#2d1f35", color="#f0883e"];
+  pvc_set [label="PVCs (apps)\nfast/bulk/ram", fillcolor="#1f2d3d", color="#a371f7"];
+  kro [label="Kro policies\n(optional schedules/PVC selection)", fillcolor="#1c2a3a", color="#58a6ff"];
+  argocd [label="ArgoCD\nmanages Velero chart", fillcolor="#1c2a3a", color="#58a6ff"];
+
+  argocd -> velero;
+  velero -> restic;
+  velero -> bsl [label="backup target"];
+  restic -> pvc_set [label="backup/restore"];
+  bsl -> sc_bulk [style=dotted, color="#f0883e", label="store on bulk"];
+  kro -> velero [style=dashed, color="#58a6ff", label="generate schedules"];
+  kro -> pvc_set [style=dashed, color="#58a6ff", label="select PVCs"];
+}

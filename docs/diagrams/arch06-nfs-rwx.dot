@@ -1,0 +1,19 @@
+digraph arch06_nfs_rwx {
+  rankdir=LR;
+  bgcolor="#0d1117";
+  node [shape=box, style="rounded,filled", fontsize=10, fontcolor="#e6edf3", color="#202733", fillcolor="#161b22"];
+  edge [color="#8b949e", arrowsize=0.8];
+
+  nfs [label="nfs-subdir-external-provisioner\n(Helm via ArgoCD)", fillcolor="#2d1f35", color="#f0883e"];
+  export_root [label="Export root\n/mnt/storage-bulk/nfs", fillcolor="#2d1f35", color="#f0883e"];
+  sc_nfs [label="SC storage-nfs\n(RWX)", fillcolor="#2d1f35", color="#f0883e"];
+  apps [label="RWX consumers\n(e.g., shared configs,\nfuture workloads)", fillcolor="#1f2d3d", color="#a371f7"];
+  argocd [label="ArgoCD\nmanages chart", fillcolor="#1c2a3a", color="#58a6ff"];
+  kustomize [label="Kustomize/Helm\nvalues overlay", fillcolor="#1c2a3a", color="#58a6ff"];
+
+  argocd -> kustomize;
+  kustomize -> nfs;
+  nfs -> sc_nfs;
+  export_root -> sc_nfs;
+  sc_nfs -> apps;
+}

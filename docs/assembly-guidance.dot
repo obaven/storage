@@ -1,0 +1,35 @@
+digraph storage_class_guidance {
+  rankdir=LR;
+  bgcolor="#0f1419";
+  node [shape=box, style="rounded,filled", fontsize=10, fontcolor="#e6edf3", color="#30363d", fillcolor="#1f2630"];
+  edge [color="#8b949e", arrowsize=0.8];
+
+  subgraph cluster_shapes {
+    label="Assembly shapes";
+    fontcolor="#9ecbff"; color="#30363d";
+    root [label="Root domains (x)\n1..7: cicd, networking, security, data, storage, web, auth", fillcolor="#1c2a3a"];
+    s1 [label="s1(x,n) = {x,H,n}\nH >= 3 tiers per domain", fillcolor="#1c2a3a"];
+    s2 [label="s2(x,n) = {s1(x,n), x,H,n}\nApply per app/component", fillcolor="#1c2a3a"];
+    sR [label="s(R,M,x,n)\nRepeat per replica/namespace", fillcolor="#1c2a3a"];
+  }
+
+  subgraph cluster_classes {
+    label="Tiered Storage Classes";
+    fontcolor="#9ecbff"; color="#30363d";
+    sc_local [label="storage-local\nGeneral use\nConfigs/queues/logs", fillcolor="#14313d", color="#1f6feb"];
+    sc_fast [label="storage-fast\nLow latency\nPostgres, Vaultwarden, Forgejo, Authentik, Redis", fillcolor="#1f2d3d", color="#a371f7"];
+    sc_bulk [label="storage-bulk\nCapacity\nHarbor registry, mail data, backups", fillcolor="#2d1f35", color="#f0883e"];
+    sc_pg [label="postgres-local-storage\nStatic 1Ti legacy PV", fillcolor="#302417", color="#c9d1d9"];
+  }
+
+  root -> s1 -> s2 -> sR;
+  s2 -> sc_local;
+  s2 -> sc_fast;
+  s2 -> sc_bulk;
+  sc_fast -> sc_pg [style=dashed, label="optionally migrate legacy PV"];
+
+  kro [label="Kro (future)\nValidate per-app class"];
+  kro -> sc_fast [style=dashed];
+  kro -> sc_bulk [style=dashed];
+  kro -> sc_local [style=dashed];
+}

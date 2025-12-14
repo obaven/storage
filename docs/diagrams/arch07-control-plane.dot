@@ -1,0 +1,24 @@
+digraph arch07_control_plane {
+  rankdir=LR;
+  bgcolor="#0d1117";
+  node [shape=box, style="rounded,filled", fontsize=10, fontcolor="#e6edf3", color="#202733", fillcolor="#161b22"];
+  edge [color="#8b949e", arrowsize=0.8];
+
+  argocd [label="ArgoCD\nApp of Apps", fillcolor="#1c2a3a", color="#58a6ff"];
+  kustomize [label="Kustomize\nbase/overlays", fillcolor="#1c2a3a", color="#58a6ff"];
+  helm [label="Helm\ncharts via inflation", fillcolor="#1c2a3a", color="#58a6ff"];
+  kro [label="Kro\npolicy/graph", fillcolor="#1c2a3a", color="#58a6ff"];
+
+  lpp [label="local-path-provisioner", fillcolor="#1f2d3d", color="#a371f7"];
+  nfs [label="nfs-subdir-external-provisioner", fillcolor="#2d1f35", color="#f0883e"];
+  velero [label="Velero + restic", fillcolor="#2d1f35", color="#f0883e"];
+
+  argocd -> kustomize [label="sync"];
+  kustomize -> helm [label="render"];
+  kustomize -> kro [style=dashed, label="optional"];
+  helm -> lpp;
+  helm -> nfs;
+  helm -> velero;
+  kro -> lpp [style=dashed, label="inventory-driven SC/PV"];
+  kro -> velero [style=dashed, label="schedules"];
+}

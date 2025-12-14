@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: storage-drive-inventory
+  namespace: storage-system
+data:
+  drives.yaml: |
+    drives:
+      - name: fast-a
+        devicePath: /dev/nvme0n1
+        capacityGi: 512
+        class: fast
+        fsType: ext4
+        nodeSelector:
+          kubernetes.io/hostname: obaven-alpha
+      - name: bulk-b
+        devicePath: /dev/sdb
+        capacityGi: 2048
+        class: bulk
+        fsType: ext4
+        nodeSelector:
+          kubernetes.io/hostname: obaven-alpha

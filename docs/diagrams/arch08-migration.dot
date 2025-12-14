@@ -1,0 +1,27 @@
+digraph arch08_migration {
+  rankdir=LR;
+  bgcolor="#0d1117";
+  node [shape=box, style="rounded,filled", fontsize=10, fontcolor="#e6edf3", color="#202733", fillcolor="#161b22"];
+  edge [color="#8b949e", arrowsize=0.8];
+
+  legacy [label="Legacy SC\nlocal-path", fillcolor="#3b2222", color="#f85149"];
+  target_fast [label="Target SC\nstorage-fast", fillcolor="#1f2d3d", color="#a371f7"];
+  target_bulk [label="Target SC\nstorage-bulk", fillcolor="#2d1f35", color="#f0883e"];
+  target_ram [label="Target SC\nstorage-ram", fillcolor="#20301f", color="#2ea043"];
+  rsync [label="Rsync job\nPVC→PVC", fillcolor="#1c2a3a", color="#58a6ff"];
+  apps_fast [label="Apps (fast)\nVW, Forgejo redis, Postgres", fillcolor="#1f2d3d", color="#a371f7"];
+  apps_bulk [label="Apps (bulk)\nHarbor, Mail, Forgejo, Postgres", fillcolor="#2d1f35", color="#f0883e"];
+  apps_ram [label="Apps (ram)\nRedis", fillcolor="#20301f", color="#2ea043"];
+  argocd [label="ArgoCD\norchestrates patches", fillcolor="#1c2a3a", color="#58a6ff"];
+
+  legacy -> rsync [label="copy data"];
+  rsync -> target_fast;
+  rsync -> target_bulk;
+  rsync -> target_ram;
+  target_fast -> apps_fast;
+  target_bulk -> apps_bulk;
+  target_ram -> apps_ram;
+  argocd -> target_fast [style=dashed, label="patch storageClass"];
+  argocd -> target_bulk [style=dashed, label="patch storageClass"];
+  argocd -> target_ram [style=dashed, label="patch storageClass"];
+}

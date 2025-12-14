@@ -1,0 +1,122 @@
+digraph storage_architecture {
+  rankdir=LR;
+  bgcolor="#0d1117";
+  node [shape=box, style="rounded,filled", fontsize=10, fontcolor="#e6edf3", color="#202733", fillcolor="#161b22"];
+  edge [color="#8b949e", arrowsize=0.8];
+
+  subgraph cluster_core {
+    label="Control Plane / GitOps";
+    fontcolor="#9ecbff"; color="#30363d";
+    argocd [label="ArgoCD\n(argocd namespace)", fillcolor="#1c2a3a", color="#58a6ff"];
+    kro [label="Kro\n(plugin)", fillcolor="#1c2a3a", color="#58a6ff"];
+  }
+
+  subgraph cluster_storage {
+    label="Storage Stack (target)";
+    fontcolor="#9ecbff"; color="#30363d";
+    lpp [label="local-path-provisioner\n(Deployment, storage-system)\nKustomize/Helm managed via ArgoCD", fillcolor="#1f2d3d", color="#a371f7"];
+    sc_local [label="StorageClass\nstorage-local (default)\nWaitForFirstConsumer, Retain, expand\nGitOps-labeled", fillcolor="#14313d", color="#1f6feb"];
+    sc_fast [label="StorageClass\nstorage-fast\nMount /mnt/storage-fast", fillcolor="#1f2d3d", color="#a371f7"];
+    sc_bulk [label="StorageClass\nstorage-bulk\nMount /mnt/storage-bulk", fillcolor="#2d1f35", color="#f0883e"];
+    sc_ram [label="StorageClass\nstorage-ram\nMount /dev/shm/redis-ram", fillcolor="#20301f", color="#2ea043"];
+    node_fast [label="Host path\n/mnt/storage-fast\n(node: obaven-alpha)", fillcolor="#1c2a3a", color="#a371f7"];
+    node_bulk [label="Host path\n/mnt/storage-bulk\n(node: obaven-alpha)", fillcolor="#1c2a3a", color="#f0883e"];
+    node_ram [label="Host path\n/dev/shm/redis-ram\n(node: obaven-alpha)", fillcolor="#1c2a2a", color="#2ea043"];
+  }
+
+  subgraph cluster_apps {
+    label="Workloads + PVCs (target mapping)";
+    fontcolor="#9ecbff"; color="#30363d";
+    mail_pod [label="mailserver pods\n(mailserver-prod)\nTarget: storage-bulk", fillcolor="#2d1f35", color="#f0883e"];
+    mail_pvc [label="PVC\nmailserver-docker-mailserver\n10Gi", fillcolor="#2d1f35", color="#f0883e"];
+
+    vw_prod_pod [label="vaultwarden-prod\nTarget: storage-fast", fillcolor="#1f2d3d", color="#a371f7"];
+    vw_prod_pvc [label="PVC\nvaultwarden-data prod\n5Gi", fillcolor="#1f2d3d", color="#a371f7"];
+    vw_dev_pod [label="vaultwarden-dev\nTarget: storage-fast", fillcolor="#1f2d3d", color="#a371f7"];
+    vw_dev_pvc [label="PVC\nvaultwarden-data dev\n5Gi", fillcolor="#1f2d3d", color="#a371f7"];
+
+    redis_prod_pod [label="redis-prod master\nTarget: storage-ram", fillcolor="#20301f", color="#2ea043"];
+    redis_prod_pvc [label="PVC\nredis-data redis-prod\n4Gi", fillcolor="#20301f", color="#2ea043"];
+    redis_dev_pod [label="redis-dev master\nTarget: storage-ram", fillcolor="#20301f", color="#2ea043"];
+    redis_dev_pvc [label="PVC\nredis-data redis-dev\n4Gi", fillcolor="#20301f", color="#2ea043"];
+
+    harbor_reg_pod [label="harbor-registry\nTarget: storage-bulk", fillcolor="#2d1f35", color="#f0883e"];
+    harbor_reg_pvc [label="PVC\nharbor-registry\n50Gi", fillcolor="#2d1f35", color="#f0883e"];
+    harbor_redis_pvc [label="PVC\nharbor-redis\n1Gi\nTarget: storage-fast", fillcolor="#1f2d3d", color="#a371f7"];
+    harbor_trivy_pvc [label="PVC\nharbor-trivy\n5Gi\nTarget: storage-bulk", fillcolor="#2d1f35", color="#f0883e"];
+    harbor_job_pvc [label="PVC\nharbor-jobservice\n1Gi\nTarget: storage-local", fillcolor="#14313d", color="#1f6feb"];
+
+    forgejo_pod [label="forgejo (gitea)\nTarget: storage-bulk", fillcolor="#2d1f35", color="#f0883e"];
+    forgejo_pvc [label="PVC\ngitea-shared-storage\n10Gi", fillcolor="#2d1f35", color="#f0883e"];
+    forgejo_redis_pvc [label="PVC\nforgejo-redis\n8Gi\nTarget: storage-ram", fillcolor="#20301f", color="#2ea043"];
+
+    kea_pod [label="kea-dhcp\nTarget: storage-local", fillcolor="#14313d", color="#1f6feb"];
+    kea_pvc [label="PVC\nkea-dhcp-leases\n1Gi", fillcolor="#14313d", color="#1f6feb"];
+
+    pg_prod_pod [label="postgresql-prod-1\nTarget: storage-bulk", fillcolor="#2d1f35", color="#f0883e"];
+    pg_prod_pvc [label="PVC\npostgresql-prod/postgresql-1\n1Ti", fillcolor="#2d1f35", color="#f0883e"];
+    pg_dev_pod [label="postgresql-dev-1\nTarget: storage-bulk", fillcolor="#2d1f35", color="#f0883e"];
+    pg_dev_pvc [label="PVC\npostgresql-dev/postgresql-1\n10Gi", fillcolor="#2d1f35", color="#f0883e"];
+
+    nfs_pod [label="nfs-subdir-external-provisioner\nTarget: storage-bulk (export root)\nManaged via ArgoCD/Kustomize/Helm", fillcolor="#2d1f35", color="#f0883e"];
+    velero [label="Velero + restic\nBackups (target: bulk)\nManaged via ArgoCD/Kustomize/Helm", fillcolor="#2d1f35", color="#f0883e"];
+  }
+
+  # Provisioners to SC
+  lpp -> sc_local [color="#58a6ff"];
+  lpp -> sc_fast [color="#a371f7"];
+  lpp -> sc_bulk [color="#f0883e"];
+  lpp -> sc_ram [color="#2ea043"];
+
+  # Host paths feed SC
+  node_fast -> sc_local [color="#58a6ff"];
+  node_bulk -> sc_local [color="#58a6ff"];
+  node_fast -> sc_fast [color="#a371f7"];
+  node_bulk -> sc_bulk [color="#f0883e"];
+  node_ram -> sc_ram [color="#2ea043"];
+
+  # Target mappings (desired state)
+  sc_fast -> vw_prod_pvc [color="#a371f7"];
+  sc_fast -> vw_dev_pvc [color="#a371f7"];
+  sc_ram -> redis_prod_pvc [color="#2ea043"];
+  sc_ram -> redis_dev_pvc [color="#2ea043"];
+  sc_fast -> harbor_redis_pvc [color="#a371f7"];
+  sc_fast -> forgejo_redis_pvc [color="#a371f7", style="dashed", label="alt"];
+  sc_bulk -> forgejo_pvc [color="#f0883e"];
+  sc_bulk -> pg_dev_pvc [color="#f0883e"];
+  sc_bulk -> pg_prod_pvc [color="#f0883e"];
+  sc_bulk -> mail_pvc [color="#f0883e"];
+  sc_bulk -> harbor_reg_pvc [color="#f0883e"];
+  sc_bulk -> harbor_trivy_pvc [color="#f0883e"];
+  sc_bulk -> harbor_job_pvc [color="#f0883e"];
+  sc_local -> kea_pvc [color="#58a6ff"];
+  sc_local -> harbor_job_pvc [color="#58a6ff", style="dashed", label="alt"];
+  sc_local -> mail_pvc [color="#58a6ff", style="dashed", label="alt"];
+
+  # PVCs to pods
+  mail_pvc -> mail_pod;
+  vw_prod_pvc -> vw_prod_pod;
+  vw_dev_pvc -> vw_dev_pod;
+  redis_prod_pvc -> redis_prod_pod;
+  redis_dev_pvc -> redis_dev_pod;
+  harbor_reg_pvc -> harbor_reg_pod;
+  harbor_redis_pvc -> harbor_reg_pod;
+  harbor_trivy_pvc -> harbor_reg_pod;
+  harbor_job_pvc -> harbor_reg_pod;
+  forgejo_pvc -> forgejo_pod;
+  forgejo_redis_pvc -> forgejo_pod;
+  kea_pvc -> kea_pod;
+  pg_prod_pvc -> pg_prod_pod;
+  pg_dev_pvc -> pg_dev_pod;
+
+  # Auxiliary apps / policies
+  nfs_pod -> sc_bulk [style=dotted, color="#f0883e", label="export root"];
+  velero -> sc_bulk [style=dotted, color="#f0883e", label="backup target"];
+  kro -> sc_fast [style=dashed, color="#58a6ff", label="policy (tier selection)"];
+  kro -> sc_bulk [style=dashed, color="#58a6ff", label="policy (tier selection)"];
+  kro -> sc_local [style=dashed, color="#58a6ff", label="policy (tier selection)"];
+  kro -> sc_ram [style=dashed, color="#58a6ff", label="policy (tier selection)"];
+
+  # ArgoCD manages storage overlay
+  argocd -> lpp [color="#58a6ff"];
+}

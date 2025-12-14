@@ -1,0 +1,19 @@
+digraph arch03_redis_ram {
+  rankdir=LR;
+  bgcolor="#0d1117";
+  node [shape=box, style="rounded,filled", fontsize=10, fontcolor="#e6edf3", color="#202733", fillcolor="#161b22"];
+  edge [color="#8b949e", arrowsize=0.8];
+
+  sc_ram [label="StorageClass\nstorage-ram", fillcolor="#20301f", color="#2ea043"];
+  host_ram [label="HostPath\n/dev/shm/redis-ram", fillcolor="#1c2a2a", color="#2ea043"];
+  redis_pvc [label="PVC\nredis-data", fillcolor="#20301f", color="#2ea043"];
+  redis_pod [label="Redis pod\nfast ephemeral", fillcolor="#20301f", color="#2ea043"];
+  lpp [label="local-path-provisioner\nnodePathMap includes /dev/shm", fillcolor="#1f2d3d", color="#a371f7"];
+  argocd [label="ArgoCD\n(manages lpp & PVC)", fillcolor="#1c2a3a", color="#58a6ff"];
+
+  argocd -> lpp;
+  lpp -> sc_ram;
+  host_ram -> sc_ram;
+  sc_ram -> redis_pvc;
+  redis_pvc -> redis_pod;
+}

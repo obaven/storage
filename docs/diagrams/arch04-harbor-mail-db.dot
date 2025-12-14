@@ -1,0 +1,26 @@
+digraph arch04_harbor_mail_db {
+  rankdir=LR;
+  bgcolor="#0d1117";
+  node [shape=box, style="rounded,filled", fontsize=10, fontcolor="#e6edf3", color="#202733", fillcolor="#161b22"];
+  edge [color="#8b949e", arrowsize=0.8];
+
+  sc_bulk [label="SC storage-bulk", fillcolor="#2d1f35", color="#f0883e"];
+  sc_fast [label="SC storage-fast", fillcolor="#1f2d3d", color="#a371f7"];
+  sc_ram [label="SC storage-ram", fillcolor="#20301f", color="#2ea043"];
+
+  harbor_reg [label="Harbor registry PVC\n50Gi", fillcolor="#2d1f35", color="#f0883e"];
+  harbor_trivy [label="Harbor trivy PVC\n5Gi", fillcolor="#2d1f35", color="#f0883e"];
+  harbor_redis [label="Harbor redis PVC\n1Gi", fillcolor="#1f2d3d", color="#a371f7"];
+  mail_pvc [label="Mailserver PVC\n10Gi", fillcolor="#2d1f35", color="#f0883e"];
+  pg_prod [label="Postgres prod PVC\n1Ti", fillcolor="#2d1f35", color="#f0883e"];
+  pg_dev [label="Postgres dev PVC\n10Gi", fillcolor="#2d1f35", color="#f0883e"];
+  redis_pvc [label="Redis PVC (alt)\n4Gi", fillcolor="#20301f", color="#2ea043"];
+
+  sc_bulk -> harbor_reg;
+  sc_bulk -> harbor_trivy;
+  sc_fast -> harbor_redis;
+  sc_bulk -> mail_pvc;
+  sc_bulk -> pg_prod;
+  sc_bulk -> pg_dev;
+  sc_ram -> redis_pvc;
+}

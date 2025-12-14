@@ -1,0 +1,42 @@
+digraph storage_integrations {
+  rankdir=LR;
+  bgcolor="#0d1117";
+  node [shape=box, style="rounded,filled", fontsize=10, fontcolor="#e6edf3", color="#202733", fillcolor="#161b22"];
+  edge [color="#8b949e", arrowsize=0.8];
+
+  # Control / render pipeline
+  argocd [label="ArgoCD\nApp of Apps", fillcolor="#1c2a3a", color="#58a6ff"];
+  kustomize [label="Kustomize\n(base/overlays)", fillcolor="#1c2a3a", color="#58a6ff"];
+  helm [label="HelmChartInflation\n(embedded in kustomize)", fillcolor="#1c2a3a", color="#58a6ff"];
+  kro [label="Kro\nInventory → SC/PV policy", fillcolor="#1c2a3a", color="#58a6ff"];
+
+  # Storage apps
+  lpp [label="local-path-provisioner\n(storage-system)\nSCs: storage-local/fast/bulk/ram", fillcolor="#1f2d3d", color="#a371f7"];
+  nfs [label="nfs-subdir-external-provisioner\n(storage-bulk export)", fillcolor="#2d1f35", color="#f0883e"];
+  velero [label="Velero + restic\n(backups to bulk)", fillcolor="#2d1f35", color="#f0883e"];
+
+  # Targets
+  sc_local [label="StorageClass\nstorage-local", fillcolor="#14313d", color="#1f6feb"];
+  sc_fast [label="StorageClass\nstorage-fast", fillcolor="#1f2d3d", color="#a371f7"];
+  sc_bulk [label="StorageClass\nstorage-bulk", fillcolor="#2d1f35", color="#f0883e"];
+  sc_ram [label="StorageClass\nstorage-ram", fillcolor="#20301f", color="#2ea043"];
+
+  # Data flow
+  argocd -> kustomize [color="#58a6ff", label="sync"];
+  kustomize -> helm [color="#58a6ff", label="render charts"];
+  kustomize -> kro [color="#58a6ff", label="optional graph"];
+  helm -> lpp [color="#a371f7", label="render/install"];
+  helm -> nfs [color="#f0883e", label="render/install"];
+  helm -> velero [color="#f0883e", label="render/install"];
+  kro -> sc_local [style=dashed, color="#58a6ff", label="policy"];
+  kro -> sc_fast [style=dashed, color="#58a6ff", label="policy"];
+  kro -> sc_bulk [style=dashed, color="#58a6ff", label="policy"];
+  kro -> sc_ram [style=dashed, color="#58a6ff", label="policy"];
+
+  lpp -> sc_local [color="#58a6ff"];
+  lpp -> sc_fast [color="#a371f7"];
+  lpp -> sc_bulk [color="#f0883e"];
+  lpp -> sc_ram [color="#2ea043"];
+  nfs -> sc_bulk [style=dotted, color="#f0883e", label="RWX via NFS"];
+  velero -> sc_bulk [style=dotted, color="#f0883e", label="backup target"];
+}
