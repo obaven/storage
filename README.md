@@ -1,4 +1,4 @@
-# Storage Orchestrator (draft)
+# Storage Application
 
 Goal: lightweight, gitops-managed storage orchestration using predefined apps (starting with local-path-provisioner) that maps our two node-attached drives into Kubernetes via Kustomize, and integrates with ArgoCD and existing platform services (authentik, etc.).
 
@@ -9,8 +9,11 @@ Goal: lightweight, gitops-managed storage orchestration using predefined apps (s
 - **Lightweight**: no distributed storage; uses local PVs with `WaitForFirstConsumer`, simple hostPath/FS mount, and templated manifests.
 
 ## Layout
-- `local-path-provisioner/`: predefined provisioner app with base manifests and a prod overlay pointing at two mount points.
-- `overlays/prod/`: aggregates storage components (currently just local-path-provisioner).
+- `local-path-provisioner/`: Local storage provisioner.
+- `minio/`: Object storage (S3 compatible).
+- `velero/`: Backup and disaster recovery.
+- `nfs-server/` & `nfs-subdir-external-provisioner/`: Network file storage.
+- `overlays/prod/`: Aggregates all storage components for the `storage-prod` ArgoCD app.
 - `docs/`: architecture notes and inventory examples.
 - `PLANNING.md`, `RUNBOOKS.md`, `STATUS.md`: day-2 and backlog notes.
 
